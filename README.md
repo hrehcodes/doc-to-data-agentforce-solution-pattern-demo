@@ -114,3 +114,26 @@ sf project deploy start --manifest manifest/package.xml --target-org <target-org
 - Keep generated secrets, local org auth files, `.sf`, `.sfdx`, and deployment output out of source control.
 - Treat prompt templates and Agentforce action descriptions as production behavior, not just documentation.
 - For production hardening, prefer Named Credential and External Credential patterns over passing API keys directly through Flow variables.
+
+## Hardening Update
+Security and reliability improvements applied after migration:
+- Removed the org-specific Lightning URL from the upload Flow and replaced it with a relative record link.
+- Prompt templates now treat uploaded contract text as untrusted content.
+- Apex account matching now checks baseline Account read/create access before querying or creating Accounts.
+
+## Known Limitations
+- Review Contract_Intake__c sharing, field classifications, and FLS before storing real contracts.
+- Flow fault handling and human-review routing should be tailored for each deployment.
+
+## Test Commands
+Validate metadata and run relevant tests after authenticating to a target org:
+
+```bash
+sf project deploy start --dry-run --manifest manifest/package.xml --target-org <target-org> --wait 30
+sf apex run test --class-names VCR_Hardening_Test --target-org <target-org> --result-format human --wait 10
+```
+
+## Troubleshooting
+- If an Agentforce action cannot authenticate, confirm the named principal secret is configured in the target org and the running user has the included permission set.
+- If a prompt action returns unsupported or unsafe content, review the prompt template safety rules and test with malicious retrieved content.
+- If deployment fails on Agentforce metadata, deploy supporting objects, Apex, Flows, credentials, and prompt templates first, then wire/publish the target agent in Builder.

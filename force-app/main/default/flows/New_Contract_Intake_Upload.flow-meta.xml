@@ -355,7 +355,7 @@
         <description>Clickable hyperlink to take user to the new record.</description>
         <name>NavigatetoNewRecord</name>
         <isViewedAsPlainText>false</isViewedAsPlainText>
-        <text>&lt;p&gt;&amp;lt;a href=&quot;https://trailsignup-5ae0dd62d0e345.lightning.force.com/lightning/r/Contract_Intake__c/{!newRecordId}/view&quot;&amp;gt;Take me to the new record&amp;lt;/a&amp;gt;&lt;/p&gt;</text>
+        <text>&lt;p&gt;&amp;lt;a href=&quot;/lightning/r/Contract_Intake__c/{!newRecordId}/view&quot;&amp;gt;Take me to the new record&amp;lt;/a&amp;gt;&lt;/p&gt;</text>
     </textTemplates>
     <variables>
         <name>newRecordId</name>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>VCR_AccountMatch</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>VCR_ParseAnalysisJson</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>VCR_ParseExtractJson</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Grants least-privilege runtime access for the Vendor Contract Intake app, flows, Apex helpers, and Contract Intake records.</description>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>Answer_Contract_Question_or_Perform_Task</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>New_Contract_Intake_Automated_Analysis</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>New_Contract_Intake_Upload</flow>
+    </flowAccesses>
+    <hasActivationRequired>false</hasActivationRequired>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Contract_Intake__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <label>Vendor Contract Intake Access</label>
+</PermissionSet>

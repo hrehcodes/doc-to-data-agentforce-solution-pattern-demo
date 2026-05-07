@@ -24,6 +24,12 @@ public with sharing class VCR_AccountMatch {
     @InvocableMethod(label='VCR Find or Create Account')
     public static List<Response> findOrCreate(List<Request> reqs) {
         List<Response> outs = new List<Response>();
+        if (!Schema.sObjectType.Account.isAccessible()) {
+            Response o = new Response();
+            o.errorMessage = 'Current user does not have read access to Account.';
+            outs.add(o);
+            return outs;
+        }
         for (Request r : reqs) {
             Response o = new Response();
             try {
@@ -96,7 +102,12 @@ public with sharing class VCR_AccountMatch {
                     o.matchScore = bestScore;
                     o.usedDomain = domain; 
                     o.normalizedVendorName = normName;
-                } else if (r.createIfMissing == true) { // <-- FIXED: Apex boolean check
+                } else if (r.createIfMissing == true) {
+                    if (!Schema.sObjectType.Account.isCreateable()) {
+                        o.errorMessage = 'Current user does not have create access to Account.';
+                        outs.add(o);
+                        continue;
+                    }
                     Account na = new Account();
                     na.Name = String.isBlank(r.vendorName) ? (String.isBlank(domain) ? 'New Vendor' : domain) : r.vendorName;
                     if (!String.isBlank(domain)) na.Website = 'https://' + domain;

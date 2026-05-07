@@ -12,3 +12,12 @@ package.xml
 **/__tests__/**
 
 node_modules/
+.sf
+.sfdx
+*.log
+*.tmp
+coverage
+node_modules
+.env
+.env.*
+*.key
