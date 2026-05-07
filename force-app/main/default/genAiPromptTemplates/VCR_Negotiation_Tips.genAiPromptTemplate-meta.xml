@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_1</activeVersionIdentifier>
+    <developerName>VCR_Negotiation_Tips</developerName>
+    <masterLabel>VCR_Negotiation_Tips</masterLabel>
+    <overridable>false</overridable>
+    <templateVersions>
+        <content>You are drafting practical negotiation guidance for a vendor contract. Input is structured fields.
+
+Return ONLY valid HTML. No extra commentary.
+
+Authoring rules:
+- Tone: neutral, vendor-friendly, concise.
+- Suggest 3–4 high-impact levers that improve customer risk posture given the inputs.
+- If a lever is already acceptable (e.g., TFC exists, Net 30), don’t suggest changing it.
+- If a value is unknown/null, either omit that lever or use “Confirm …” as the action.
+
+RICH TEXT (Lightning-safe):
+- Allowed tags only: &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;u&gt;, &lt;s&gt;, &lt;hr&gt;, &lt;a&gt;.
+- Do NOT use images, tables, inline styles, or any attributes (no style=, class=, target=, etc.).
+- Use a single-level list (no nesting mixed list types).
+- Keep total length under ~900 characters.
+
+Structure (follow exactly):
+&lt;h3&gt;Top Negotiation Levers&lt;/h3&gt;
+&lt;ul&gt;
+ &lt;li&gt;…one lever with the concrete change…&lt;/li&gt;
+ &lt;li&gt;…&lt;/li&gt;
+ &lt;li&gt;…&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Suggested Language&lt;/h3&gt;
+&lt;ol&gt;
+ &lt;li&gt;…short clause ≤30 words tailored to inputs…&lt;/li&gt;
+ &lt;li&gt;…&lt;/li&gt;
+&lt;/ol&gt;
+
+Guidance logic (examples, apply only if relevant):
+- Payment terms: if &gt;30, propose Net 30–45; if 31–45, propose Net 30.
+- Auto-renew + notice: if auto-renew=true and notice ≤30, propose 60–90 days’ notice; if 31–60, propose 60–90.
+- TFC: if false, propose bilateral termination for convenience with 30 days’ notice.
+- Indemnity: if false, propose mutual indemnity for third-party IP, confidentiality, and data breach.
+- Liability cap: if text implies “unlimited”, propose cap = 12 months’ fees and carve-outs for IP infringement, confidentiality, data breach.
+- DPA + Security: if DPA required and no Security/SLA, propose attaching security schedule with uptime/RTO/RPO.
+
+If Risk_Class__c is &quot;High&quot;, prioritize firmer levers; if &quot;Low&quot;, keep suggestions minimal.
+
+Output schema with HTML tags example:
+&lt;h3&gt;Top Negotiation Levers&lt;/h3&gt;...&lt;h3&gt;Suggested Language&lt;/h3&gt;...
+
+Contract to Analyze: 
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultVertexAIGeminiPro25</primaryModel>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_1</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

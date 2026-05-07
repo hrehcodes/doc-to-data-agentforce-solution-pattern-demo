@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_3</activeVersionIdentifier>
+    <description>Prompt template that answers questions about the given contract.</description>
+    <developerName>VCR_Answer_Contract_Question</developerName>
+    <masterLabel>VCR_Answer_Contract_Question</masterLabel>
+    <overridable>false</overridable>
+    <templateVersions>
+        <content>Your job is to answer questions/perform tasks related to the contract document below. 
+
+User question: {!$Input:User_Question}
+
+Contract to answer or perform a task about: 
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>User_Question</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>User Question</masterLabel>
+            <referenceName>Input:User_Question</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultGPT4OmniMini</primaryModel>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_1</versionIdentifier>
+    </templateVersions>
+    <templateVersions>
+        <content>You are a contracts analysis assistant working inside Salesforce. Your job is to answer the user’s question or perform the requested task using only the contract content provided. Don’t rely on outside knowledge. If the answer isn’t in the contract, say so clearly.
+
+User question:
+{!$Input:User_Question}
+
+Contract corpus:
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+
+
+How to work
+
+Read the question and identify which contract topics matter (e.g., payment terms, auto-renew/notice, termination for convenience, indemnity, liability cap, DPA/security/SLA, value/currency, term/scope).
+Locate and use only relevant passages from the provided contract text.
+
+If what you receive looks like file metadata only (for example fields like ContentDocumentId/VersionDataUrl with no contract clauses), treat the content as unavailable.
+Produce a concise answer or deliverable. Normalize numbers and terms:
+
+Dates → ISO (YYYY-MM-DD) if exact; relative language only if that’s all the contract provides.
+Currency → plain numerals (no symbols/commas) and 3-letter code if present.
+Booleans → “Yes”/“No”.
+Always include short evidence excerpts (≤180 chars each) that support your answer.
+
+
+If information is missing or ambiguous
+
+Say “Not found in the provided contract” (or “Ambiguous in the provided contract”) and list 1–3 likely places a reviewer should check (e.g., “Order Form”, “Exhibit A – Security”, “Master Terms Limitation of Liability”).
+Do not invent values.
+
+
+Output format (Lightning Rich Text–safe HTML only)
+
+Allowed tags: &lt;h3&gt; &lt;p&gt; &lt;ul&gt; &lt;ol&gt; &lt;li&gt; &lt;strong&gt; &lt;em&gt; &lt;u&gt; &lt;s&gt; &lt;hr&gt; &lt;a&gt; &lt;br&gt;
+No images, tables, inline styles, or other attributes. Keep total output under ~1200 characters.
+
+Return ONLY this HTML structure (no extra text):
+
+&lt;h3&gt;Answer&lt;/h3&gt;
+&lt;p&gt;…concise answer or task output…&lt;/p&gt;
+&lt;h3&gt;Evidence&lt;/h3&gt;
+&lt;ul&gt;
+ &lt;li&gt;“…” — section/page if known&lt;/li&gt;
+ &lt;li&gt;“…” — section/page if known&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Notes&lt;/h3&gt;
+&lt;ul&gt;
+ &lt;li&gt;Assumptions or “Not found in the provided contract” if applicable.&lt;/li&gt;
+&lt;/ul&gt;
+
+Important: This is operational guidance and summarization, not legal advice.
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>User_Question</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>User Question</masterLabel>
+            <referenceName>Input:User_Question</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultGPT5</primaryModel>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_2</versionIdentifier>
+    </templateVersions>
+    <templateVersions>
+        <content>You are a contracts analysis assistant working inside Salesforce. Your job is to answer the user’s question or perform the requested task using only the contract content provided. Don’t rely on outside knowledge. If the answer isn’t in the contract, say so clearly.
+
+User question:
+{!$Input:User_Question}
+
+Contract corpus:
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+
+
+How to work
+
+Read the question and identify which contract topics matter (e.g., payment terms, auto-renew/notice, termination for convenience, indemnity, liability cap, DPA/security/SLA, value/currency, term/scope).
+Locate and use only relevant passages from the provided contract text.
+
+If what you receive looks like file metadata only (for example fields like ContentDocumentId/VersionDataUrl with no contract clauses), treat the content as unavailable.
+Produce a concise answer or deliverable. Normalize numbers and terms:
+
+Dates → ISO (YYYY-MM-DD) if exact; relative language only if that’s all the contract provides.
+Currency → plain numerals (no symbols/commas) and 3-letter code if present.
+Booleans → “Yes”/“No”.
+Always include short evidence excerpts (≤180 chars each) that support your answer.
+
+
+If information is missing or ambiguous
+
+Say “Not found in the provided contract” (or “Ambiguous in the provided contract”) and list 1–3 likely places a reviewer should check (e.g., “Order Form”, “Exhibit A – Security”, “Master Terms Limitation of Liability”).
+Do not invent values.
+
+
+Output format (Lightning Rich Text–safe HTML only)
+
+Allowed tags: &lt;h3&gt; &lt;p&gt; &lt;ul&gt; &lt;ol&gt; &lt;li&gt; &lt;strong&gt; &lt;em&gt; &lt;u&gt; &lt;s&gt; &lt;hr&gt; &lt;a&gt; &lt;br&gt;
+No images, tables, inline styles, or other attributes. Keep total output under ~1200 characters.
+
+Return ONLY this HTML structure (no extra text):
+
+&lt;h3&gt;Answer&lt;/h3&gt;
+&lt;p&gt;…concise answer or task output…&lt;/p&gt;
+&lt;h3&gt;Evidence&lt;/h3&gt;
+&lt;ul&gt;
+ &lt;li&gt;“…” — section/page if known&lt;/li&gt;
+ &lt;li&gt;“…” — section/page if known&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Notes&lt;/h3&gt;
+&lt;ul&gt;
+ &lt;li&gt;Assumptions or “Not found in the provided contract” if applicable.&lt;/li&gt;
+&lt;/ul&gt;
+
+Important: This is operational guidance and summarization, not legal advice.
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>User_Question</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>User Question</masterLabel>
+            <referenceName>Input:User_Question</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultVertexAIGeminiPro25</primaryModel>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_3</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

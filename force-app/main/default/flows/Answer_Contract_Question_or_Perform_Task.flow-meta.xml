@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <description>The prompt template that answers the questions or performs the task about a contract.</description>
+        <name>Answer_Contract_Question_or_Perform_Contract_Task</name>
+        <label>Answer Contract Question or Perform Contract Task</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>VCR_Answer_Contract_Question</actionName>
+        <actionType>generatePromptResponse</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>Input:User_Question</name>
+            <value>
+                <elementReference>User_Query</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>Input:Input_Contract</name>
+            <value>
+                <elementReference>Get_Current_Contract_Intake_Record</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>VCR_Answer_Contract_Question</nameSegment>
+        <offset>0</offset>
+        <outputParameters>
+            <assignToReference>Agent_Response</assignToReference>
+            <name>promptResponse</name>
+        </outputParameters>
+    </actionCalls>
+    <apiVersion>64.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <description>This is the flow that handles a user&apos;s task or question about a contract intake. The end user asks a question or asks for a task to be performed and the record ID and user query are handled by the flow and then the answer is brought back to Agentforce to handle.</description>
+    <environments>Default</environments>
+    <interviewLabel>Answer Contract Question or Perform Task {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Answer Contract Question or Perform Task</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Current_Contract_Intake_Record</name>
+        <label>Get Current Contract Intake Record</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Answer_Contract_Question_or_Perform_Contract_Task</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>RecordId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Contract_Intake__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Current_Contract_Intake_Record</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <description>This is the response for the agent to address the end user&apos;s question or task request.</description>
+        <name>Agent_Response</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <description>RecordId for the contract intake record to answer questions about.</description>
+        <name>RecordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>This is the query from the end user that needs to be addressed or answered.</description>
+        <name>User_Query</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

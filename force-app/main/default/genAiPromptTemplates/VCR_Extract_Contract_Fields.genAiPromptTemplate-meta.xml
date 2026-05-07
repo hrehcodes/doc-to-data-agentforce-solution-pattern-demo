@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_3</activeVersionIdentifier>
+    <description>Extract the key fields for the input contract.</description>
+    <developerName>VCR_Extract_Contract_Fields</developerName>
+    <masterLabel>VCR_Extract_Contract_Fields</masterLabel>
+    <overridable>false</overridable>
+    <templateVersions>
+        <content>You are a contract intake extractor. The input is plain contract text.
+Return ONLY valid JSON matching the schema exactly. No commentary.
+
+Rules
+- Do NOT invent values. If a value is absent or ambiguous: use &quot;unknown&quot; (strings) or null (numbers/booleans).
+- Prefer numerals in parentheses when words and numbers disagree (e.g., “thirty (30)” → 30).
+- Normalize the common patterns:
+ • “Net 30”, “within thirty (30) days” → 30 (Payment_Terms_Days__c)
+ • “auto-renews annually” → Auto_Renew__c=true, Auto_Renew_Period_Months__c=12
+ • “…unless thirty (30) days’ notice” → Notice_Period_Days__c=30
+ • “no limitation of liability shall apply” → Liability_Cap_Text__c=&quot;unlimited&quot;
+- Provide short clause excerpts that justify the extracted decisions (1 short sentence each if found).
+- Provide confidences (0–1) for decision-critical fields.
+- Emit numbers without units or symbols: &quot;30 days&quot; → 30; &quot;$250,000&quot; → 250000; &quot;12 months&quot; → 12.
+- For any unknown or not-applicable numeric field, use null (not 0).
+- If Auto_Renew__c = false, set Auto_Renew_Period_Months__c = null.
+- Confidence scoring:
+ • 1.0 only when an explicit clause contains an exact numeric/Boolean phrase with parentheses, e.g., “thirty (30) days”, “does not auto-renew”.
+ • 0.8 when inferred from a clear but non-parenthetical phrase, e.g., “Net 45”, “auto-renews annually”.
+ • 0.6 when implied by context or partial sentence.
+ • 0.4 when deduced across multiple sentences or synonyms.
+ • If field is unknown/null → omit confidence or set ≤ 0.5.
+- Source_Excerpts__c must be a single-line, minified JSON string with keys:
+ payment_terms, termination, indemnity, liability, auto_renew, security.
+- Each value ≤ 180 characters; strip newlines and quotes where possible.
+- Set Currency_Code__c to a 3-letter code like &quot;USD&quot; when obvious.
+- Set CurrencyIsoCode to the same code ONLY if it is present in the text; otherwise output null.
+
+Decision-critical fields (must have confidence values):
+Payment_Terms_Days__c, Termination_for_Convenience__c, Indemnity_Present__c, Liability_Cap_Text__c,
+Auto_Renew__c, Notice_Period_Days__c, Data_Processing_DPA_Required__c, SecuritySLA_Present__c.
+
+JSON Schema: 
+
+{
+ &quot;Vendor_Name__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Contract_Title__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Contract_Value__c&quot;: 0,
+ &quot;Currency_Code__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;CurrencyIsoCode&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+
+ &quot;Payment_Terms_Days__c&quot;: 0,
+ &quot;Auto_Renew__c&quot;: true,
+ &quot;Auto_Renew_Period_Months__c&quot;: 0,
+ &quot;Notice_Period_Days__c&quot;: 0,
+ &quot;Termination_for_Convenience__c&quot;: true,
+ &quot;Indemnity_Present__c&quot;: true,
+ &quot;Liability_Cap_Text__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Data_Processing_DPA_Required__c&quot;: true,
+ &quot;SecuritySLA_Present__c&quot;: true,
+
+ &quot;Source_Excerpts__c&quot;: &quot;{\&quot;payment_terms\&quot;:\&quot;...\&quot;,\&quot;termination\&quot;:\&quot;...\&quot;,\&quot;indemnity\&quot;:\&quot;...\&quot;,\&quot;liability\&quot;:\&quot;...\&quot;,\&quot;auto_renew\&quot;:\&quot;...\&quot;,\&quot;security\&quot;:\&quot;...\&quot;}&quot;,
+ &quot;confidences&quot;: {
+  &quot;Payment_Terms_Days__c&quot;: 0.0,
+  &quot;Termination_for_Convenience__c&quot;: 0.0,
+  &quot;Indemnity_Present__c&quot;: 0.0,
+  &quot;Liability_Cap_Text__c&quot;: 0.0,
+  &quot;Auto_Renew__c&quot;: 0.0,
+  &quot;Notice_Period_Days__c&quot;: 0.0,
+  &quot;Data_Processing_DPA_Required__c&quot;: 0.0,
+  &quot;SecuritySLA_Present__c&quot;: 0.0
+ }
+}
+
+Few-shot hints:
+
+“Payment due within sixty (60) days” → Payment_Terms_Days__c: 60
+“Agreement automatically renews for one (1) year terms unless thirty (30) days’ notice” → Auto_Renew__c: true, Auto_Renew_Period_Months__c: 12, Notice_Period_Days__c: 30
+“No termination for convenience” → Termination_for_Convenience__c: false
+“No limitation of liability shall apply” → Liability_Cap_Text__c: &quot;unlimited&quot;
+
+Output mapping: Map each property to the same-named field (strings → Text/Rich/Long Text; numbers → Number/Currency; booleans → Checkbox).
+
+Contract to extract values from: 
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultVertexAIGeminiPro25</primaryModel>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_1</versionIdentifier>
+    </templateVersions>
+    <templateVersions>
+        <content>You are a contract intake extractor. The input is plain contract text.
+Return ONLY valid JSON matching the schema exactly. No commentary.
+
+Rules
+- Do NOT invent values. If a value is absent or ambiguous: use &quot;unknown&quot; (strings) or null (numbers/booleans).
+- Prefer numerals in parentheses when words and numbers disagree (e.g., “thirty (30)” → 30).
+- Normalize the common patterns:
+ • “Net 30”, “within thirty (30) days” → 30 (Payment_Terms_Days__c)
+ • “auto-renews annually” → Auto_Renew__c=true, Auto_Renew_Period_Months__c=12
+ • “…unless thirty (30) days’ notice” → Notice_Period_Days__c=30
+ • “no limitation of liability shall apply” → Liability_Cap_Text__c=&quot;unlimited&quot;
+- Provide short clause excerpts that justify the extracted decisions (1 short sentence each if found).
+- Provide confidences (0–1) for decision-critical fields.
+- Emit numbers without units or symbols: &quot;30 days&quot; → 30; &quot;$250,000&quot; → 250000; &quot;12 months&quot; → 12.
+- For any unknown or not-applicable numeric field, use null (not 0).
+- If Auto_Renew__c = false, set Auto_Renew_Period_Months__c = null.
+- Confidence scoring:
+ • 1.0 only when an explicit clause contains an exact numeric/Boolean phrase with parentheses, e.g., “thirty (30) days”, “does not auto-renew”.
+ • 0.8 when inferred from a clear but non-parenthetical phrase, e.g., “Net 45”, “auto-renews annually”.
+ • 0.6 when implied by context or partial sentence.
+ • 0.4 when deduced across multiple sentences or synonyms.
+ • If field is unknown/null → omit confidence or set ≤ 0.5.
+- Source_Excerpts__c must be a single-line, minified JSON string with keys:
+ payment_terms, termination, indemnity, liability, auto_renew, security.
+- Each value ≤ 180 characters; strip newlines and quotes where possible.
+- Set Currency_Code__c to a 3-letter code like &quot;USD&quot; when obvious.
+- Set CurrencyIsoCode to the same code ONLY if it is present in the text; otherwise output null.
+
+Decision-critical fields (must have confidence values):
+Payment_Terms_Days__c, Termination_for_Convenience__c, Indemnity_Present__c, Liability_Cap_Text__c,
+Auto_Renew__c, Notice_Period_Days__c, Data_Processing_DPA_Required__c, SecuritySLA_Present__c.
+
+JSON Schema: 
+
+{
+ &quot;Vendor_Name__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Contract_Title__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Contract_Value__c&quot;: 0,
+ &quot;Currency_Code__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;CurrencyIsoCode&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+
+ &quot;Payment_Terms_Days__c&quot;: 0,
+ &quot;Auto_Renew__c&quot;: true,
+ &quot;Auto_Renew_Period_Months__c&quot;: 0,
+ &quot;Notice_Period_Days__c&quot;: 0,
+ &quot;Termination_for_Convenience__c&quot;: true,
+ &quot;Indemnity_Present__c&quot;: true,
+ &quot;Liability_Cap_Text__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Data_Processing_DPA_Required__c&quot;: true,
+ &quot;SecuritySLA_Present__c&quot;: true,
+
+ &quot;Source_Excerpts__c&quot;: &quot;{\&quot;payment_terms\&quot;:\&quot;...\&quot;,\&quot;termination\&quot;:\&quot;...\&quot;,\&quot;indemnity\&quot;:\&quot;...\&quot;,\&quot;liability\&quot;:\&quot;...\&quot;,\&quot;auto_renew\&quot;:\&quot;...\&quot;,\&quot;security\&quot;:\&quot;...\&quot;}&quot;,
+ &quot;confidences&quot;: {
+  &quot;Payment_Terms_Days__c&quot;: 0.0,
+  &quot;Termination_for_Convenience__c&quot;: 0.0,
+  &quot;Indemnity_Present__c&quot;: 0.0,
+  &quot;Liability_Cap_Text__c&quot;: 0.0,
+  &quot;Auto_Renew__c&quot;: 0.0,
+  &quot;Notice_Period_Days__c&quot;: 0.0,
+  &quot;Data_Processing_DPA_Required__c&quot;: 0.0,
+  &quot;SecuritySLA_Present__c&quot;: 0.0
+ }
+}
+
+Few-shot hints:
+
+“Payment due within sixty (60) days” → Payment_Terms_Days__c: 60
+“Agreement automatically renews for one (1) year terms unless thirty (30) days’ notice” → Auto_Renew__c: true, Auto_Renew_Period_Months__c: 12, Notice_Period_Days__c: 30
+“No termination for convenience” → Termination_for_Convenience__c: false
+“No limitation of liability shall apply” → Liability_Cap_Text__c: &quot;unlimited&quot;
+
+Output mapping: Map each property to the same-named field (strings → Text/Rich/Long Text; numbers → Number/Currency; booleans → Checkbox).
+
+Contract to extract values from: 
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultVertexAIGeminiPro25</primaryModel>
+        <responseFormat>JSON</responseFormat>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_2</versionIdentifier>
+    </templateVersions>
+    <templateVersions>
+        <content>You are a contract intake extractor. The input is plain contract text.
+Return ONLY valid JSON matching the schema exactly. No commentary.
+
+
+Rules
+
+No hallucinations. If a value is absent or ambiguous: use &quot;unknown&quot; for strings, null for numbers/booleans.
+Prefer numerals in parentheses when words and numbers disagree (e.g., “thirty (30)” → 30).
+Normalize patterns:
+
+“Net 30”, “within thirty (30) days” → 30 (Payment_Terms_Days__c)
+“auto-renews annually” → Auto_Renew__c=true, Auto_Renew_Period_Months__c=12
+“…unless thirty (30) days’ notice” → Notice_Period_Days__c=30
+“no limitation of liability shall apply” → Liability_Cap_Text__c=“unlimited”
+Emit numbers without units/symbols: &quot;30 days&quot; → 30; &quot;$250,000&quot; → 250000; &quot;12 months&quot; → 12.
+For any unknown/not-applicable numeric or boolean field, return null (not 0/false).
+If Auto_Renew__c = false, set Auto_Renew_Period_Months__c = null.
+Website/Phone/Address extraction
+
+Website: return canonical URL, preferring https:// and stripping www. (e.g., https://vendor.com). If absent → &quot;unknown&quot;.
+Phone: main corporate number; keep leading + if present, otherwise digits only (e.g., +14155551212 or 4155551212). If absent → &quot;unknown&quot;.
+Address: pick one mailing address for the vendor; split into Street / City / State / Postal / Country. If multi-line street, join with “, ”. Unknown pieces → &quot;unknown&quot;.
+Currency codes
+
+Currency_Code__c: 3-letter code like &quot;USD&quot; when obvious, else &quot;unknown&quot;.
+CurrencyIsoCode: set to the same code only if explicitly present in the text, otherwise null.
+Source_Excerpts__c must be a single-line, minified JSON string with keys:
+payment_terms, termination, indemnity, liability, auto_renew, security.
+Each value ≤ 180 chars; strip newlines; escape quotes.
+Provide confidences (0–1) for decision-critical fields.
+
+
+Confidence scoring
+
+1.0 only when an explicit clause contains an exact numeric/Boolean with parentheses (e.g., “thirty (30) days”, “does not auto-renew”).
+0.8 clear phrase without parentheses (e.g., “Net 45”, “auto-renews annually”).
+0.6 implied by context/partial sentence.
+0.4 deduced across multiple sentences/synonyms.
+If a field is unknown/null → omit confidence or set ≤ 0.5.
+
+Decision-critical fields (must have confidence values):
+Payment_Terms_Days__c, Termination_for_Convenience__c, Indemnity_Present__c, Liability_Cap_Text__c, Auto_Renew__c, Notice_Period_Days__c, Data_Processing_DPA_Required__c, SecuritySLA_Present__c.
+
+JSON Schema: 
+
+{
+ &quot;Vendor_Name__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Contract_Title__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Contract_Value__c&quot;: 0,
+ &quot;Currency_Code__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;CurrencyIsoCode&quot;: null,
+
+ &quot;Payment_Terms_Days__c&quot;: 0,
+ &quot;Auto_Renew__c&quot;: true,
+ &quot;Auto_Renew_Period_Months__c&quot;: 0,
+ &quot;Notice_Period_Days__c&quot;: 0,
+ &quot;Termination_for_Convenience__c&quot;: true,
+ &quot;Indemnity_Present__c&quot;: true,
+ &quot;Liability_Cap_Text__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Data_Processing_DPA_Required__c&quot;: true,
+ &quot;SecuritySLA_Present__c&quot;: true,
+
+ &quot;Vendor_Website__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Vendor_Phone__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Vendor_Street__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Vendor_City__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Vendor_State__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Vendor_Postal_Code__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+ &quot;Vendor_Country__c&quot;: &quot;string or \&quot;unknown\&quot;&quot;,
+
+ &quot;Source_Excerpts__c&quot;: &quot;{\&quot;payment_terms\&quot;:\&quot;...\&quot;,\&quot;termination\&quot;:\&quot;...\&quot;,\&quot;indemnity\&quot;:\&quot;...\&quot;,\&quot;liability\&quot;:\&quot;...\&quot;,\&quot;auto_renew\&quot;:\&quot;...\&quot;,\&quot;security\&quot;:\&quot;...\&quot;}&quot;,
+ &quot;confidences&quot;: {
+  &quot;Payment_Terms_Days__c&quot;: 0.0,
+  &quot;Termination_for_Convenience__c&quot;: 0.0,
+  &quot;Indemnity_Present__c&quot;: 0.0,
+  &quot;Liability_Cap_Text__c&quot;: 0.0,
+  &quot;Auto_Renew__c&quot;: 0.0,
+  &quot;Notice_Period_Days__c&quot;: 0.0,
+  &quot;Data_Processing_DPA_Required__c&quot;: 0.0,
+  &quot;SecuritySLA_Present__c&quot;: 0.0
+ }
+}
+
+
+Few-shot hints
+
+“Payment due within sixty (60) days” → Payment_Terms_Days__c: 60
+“Agreement automatically renews for one (1) year terms unless thirty (30) days’ notice” → Auto_Renew__c: true, Auto_Renew_Period_Months__c: 12, Notice_Period_Days__c: 30
+“No termination for convenience” → Termination_for_Convenience__c: false
+“No limitation of liability shall apply” → Liability_Cap_Text__c: &quot;unlimited&quot;
+“Vendor website: https://vendor.com | Phone: +1 (415) 555-1212 | Address: 123 Main St, Springfield, IL 62701, USA” → populate Website/Phone/Address fields accordingly.
+
+Output mapping: Map each property to the same-named Salesforce field (strings → Text/Rich/Long Text; numbers → Number/Currency; booleans → Checkbox). Numbers/booleans may be null.
+
+Contract to extract values from:
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultVertexAIGeminiPro25</primaryModel>
+        <responseFormat>JSON</responseFormat>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_3</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

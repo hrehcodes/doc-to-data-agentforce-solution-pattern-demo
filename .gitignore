@@ -1,0 +1,27 @@
+# Salesforce local state
+.sf/
+.sfdx/
+.localdevserver/
+
+# Logs and command output
+*.log
+*.tmp
+coverage/
+
+# OS/editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Node tooling, if added later
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets
+.env
+.env.*
+*.key
+server.key
+jwt.key

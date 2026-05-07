@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>true</customObject>
+    <description>Stores extracted terms and automated risk analysis for vendor contracts. Populated via Screen Flow + Prompt Template; includes commercial/legal fields, computed risk score/class, justification, and source excerpts for auditability.</description>
+    <motif>Custom13: Box</motif>
+</CustomTab>

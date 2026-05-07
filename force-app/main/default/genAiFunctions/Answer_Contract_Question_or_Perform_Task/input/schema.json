@@ -1,0 +1,21 @@
+{
+  "required" : [ "RecordId", "User_Query" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "RecordId" : {
+      "title" : "RecordId",
+      "description" : "RecordId for the contract intake record to answer questions about.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "User_Query" : {
+      "title" : "User_Query",
+      "description" : "This is the query from the end user that needs to be addressed or answered.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : true
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

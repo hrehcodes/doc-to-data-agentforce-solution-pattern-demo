@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>This is the flow that handles a user&apos;s task or question about a contract intake. The end user asks a question or asks for a task to be performed and the record ID and user query are handled by the flow and then the answer is brought back to Agentforce to handle.</description>
+    <developerName>Answer_Contract_Question_or_Perform_Task</developerName>
+    <invocationTarget>Answer_Contract_Question_or_Perform_Task</invocationTarget>
+    <invocationTargetType>flow</invocationTargetType>
+    <isConfirmationRequired>false</isConfirmationRequired>
+    <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+    <masterLabel>Answer Contract Question or Perform Task</masterLabel>
+    <progressIndicatorMessage>Searching contract...</progressIndicatorMessage>
+</GenAiFunction>

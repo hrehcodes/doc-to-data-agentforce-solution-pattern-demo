@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_1</activeVersionIdentifier>
+    <description>Analyzes the risks according to rules set by the firm for the given contract.</description>
+    <developerName>VCR_Analyze_Contract_Risk</developerName>
+    <masterLabel>VCR_Analyze_Contract_Risk</masterLabel>
+    <overridable>false</overridable>
+    <templateVersions>
+        <content>You are a contract risk scorer. The input is raw contract text in English.
+
+Return ONLY valid JSON matching the output schema below. No extra commentary.
+
+WORKFLOW
+1) Extract only the signals needed for scoring (do not output them unless asked):
+  • Payment terms in days (normalize “Net 30”, “within thirty (30) days” → 30).
+  • Whether the agreement auto-renews and the renewal period in months (e.g., “annually” → 12).
+  • Notice period in days for non-renewal/termination where specified.
+  • Whether termination for convenience (TFC) is available.
+  • Whether an indemnity clause exists.
+  • Liability cap text; detect if it implies “unlimited”.
+  • Whether a Data Processing Addendum (DPA) is required/present and whether a security/SLA schedule is present.
+  When ambiguous or absent: set value “unknown” (text) or null (numbers/booleans).
+
+2) Compute deterministically (start Risk_Score__c = 100; subtract):
+  • Payment terms &gt;60 → −25; 46–60 → −15; 31–45 → −5
+  • No termination for convenience → −20
+  • Auto-renew = true AND Notice ≤30 → −15; 31–60 → −8; &gt;60 → −3
+  • Indemnity missing → −20
+  • Liability contains &quot;unlimited&quot; (case-insensitive) → −25
+  • DPA required AND Security/SLA absent → −15
+  • If a Contract Value can be inferred (e.g., &quot;$320,000&quot;) and is &gt;250000 AND any penalty above applied → extra −10
+   (If no value is found, do not apply the extra −10.)
+
+3) Map score to class:
+  • High ≤55 ; Medium 56–79 ; Low ≥80
+
+4) Lowest_Confidence_0100__c:
+  • Derive per-signal confidences [0..1]:
+   1.0 explicit with parenthetical numerals or “does not auto-renew / no termination” style clauses
+   0.8 clear but non-parenthetical phrases (e.g., “Net 45”, “auto-renews annually”)
+   0.6 inferred by context or across sentences
+   0.4 heavily implied
+   ≤0.5 if unknown/null
+  • Take the minimum across: payment_terms, termination_for_convenience, indemnity, liability_cap, auto_renew, notice_period, dpa, security_sla.
+  • Convert to integer 0–100 (floor).
+
+5) Needs_Review__c = true if Lowest_Confidence_0100__c &lt; 70 OR any decision-critical item above is null/&quot;unknown&quot;.
+
+RICH TEXT (VERY IMPORTANT — ONLY USE THESE TAGS)
+• Allowed tags: &lt;h1&gt; … &lt;h6&gt;, &lt;p&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;b&gt;, &lt;em&gt;, &lt;i&gt;, &lt;u&gt;, &lt;s&gt; (or &lt;strike&gt;), &lt;hr&gt;, 
+ &lt;table&gt;, &lt;thead&gt;, &lt;tbody&gt;, &lt;tr&gt;, &lt;th&gt;, &lt;td&gt;, &lt;code&gt;, &lt;pre&gt;, &lt;span&gt; (NO inline styles), &lt;a&gt;.
+• Do NOT use: &lt;style&gt;, &lt;script&gt;, &lt;svg&gt;, &lt;img&gt;, inline CSS styles, data attributes, or any unsupported tags.
+• Do NOT add attributes such as style=, class=, border=, cellpadding=, width=, align=, etc. (plain tags only).
+• Lists: use a single-level &lt;ul&gt; or &lt;ol&gt;. Do not nest a bulleted list within a numbered list or vice versa.
+• Links (if any) must be &lt;a href=&quot;https://…&quot;&gt;text&lt;/a&gt; — target will be _blank automatically in Lightning.
+• Keep total HTML under ~1500 characters. Avoid emoji/special glyphs that may render inconsistently.
+
+FORMAT FOR Risk_Justification__c (must follow exactly)
+1) A brief heading: &lt;h3&gt;Risk Summary&lt;/h3&gt;
+2) A single unordered list with 3–5 bullets (&lt;ul&gt;&lt;li&gt;…&lt;/li&gt;&lt;/ul&gt;) naming top drivers (e.g., “Payment terms Net 60”, “No TFC”, “Unlimited liability”).
+3) A compact score breakdown table using only these tags (no attributes):
+  &lt;h3&gt;Score Breakdown&lt;/h3&gt;
+  &lt;table&gt;
+   &lt;thead&gt;&lt;tr&gt;&lt;th&gt;Factor&lt;/th&gt;&lt;th&gt;Value&lt;/th&gt;&lt;th&gt;Δ&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+   &lt;tbody&gt;
+    &lt;tr&gt;&lt;td&gt;Payment Terms&lt;/td&gt;&lt;td&gt;Net 45&lt;/td&gt;&lt;td&gt;-5&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Auto-Renew/Notice&lt;/td&gt;&lt;td&gt;true / 45&lt;/td&gt;&lt;td&gt;-8&lt;/td&gt;&lt;/tr&gt;
+    ...
+   &lt;/tbody&gt;
+  &lt;/table&gt;
+
+SAFEGUARDS
+• Do not invent numbers; if unclear, use null. If the input appears to be file metadata (ContentDocumentId, VersionDataUrl, etc.) with no clauses, output Risk_Score__c=50, Risk_Class__c=&quot;High&quot;, Needs_Review__c=true, Lowest_Confidence_0100__c=50, and a justification stating the text was not a contract.
+
+JSON Output Schema: 
+{
+ &quot;Risk_Score__c&quot;: 0,
+ &quot;Risk_Class__c&quot;: &quot;Low | Medium | High&quot;,
+ &quot;Needs_Review__c&quot;: true,
+ &quot;Lowest_Confidence_0100__c&quot;: 0,
+ &quot;Risk_Justification__c&quot;: &quot;&lt;h3&gt;Risk Summary&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;…&lt;/li&gt;&lt;/ul&gt;&lt;h3&gt;Score Breakdown&lt;/h3&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Factor&lt;/th&gt;&lt;th&gt;Value&lt;/th&gt;&lt;th&gt;Δ&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;…&lt;/td&gt;&lt;td&gt;…&lt;/td&gt;&lt;td&gt;-5&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&quot;
+}
+
+Here is the contract to analyze: 
+{!$RelatedList:Input_Contract.CombinedAttachments.Records}
+</content>
+        <inputs>
+            <apiName>Input_Contract</apiName>
+            <definition>SOBJECT://Contract_Intake__c</definition>
+            <masterLabel>Input Contract</masterLabel>
+            <referenceName>Input:Input_Contract</referenceName>
+            <required>true</required>
+        </inputs>
+        <isCitationEnabled>false</isCitationEnabled>
+        <primaryModel>sfdc_ai__DefaultVertexAIGeminiPro25</primaryModel>
+        <responseFormat>JSON</responseFormat>
+        <status>Published</status>
+        <templateDataProviders>
+            <definition>invocable://getRelatedList</definition>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>parentRecordId</parameterName>
+                <valueExpression>{!$Input:Input_Contract.Id}</valueExpression>
+            </parameters>
+            <parameters>
+                <definition>primitive://String</definition>
+                <isRequired>true</isRequired>
+                <parameterName>relatedListName</parameterName>
+                <valueExpression>CombinedAttachments</valueExpression>
+            </parameters>
+            <referenceName>RelatedList:Input_Contract.CombinedAttachments.Records</referenceName>
+        </templateDataProviders>
+        <versionIdentifier>N6V2CY0XopkytlvH4oadPhaILBX/TbL/B2//8uWYhxU=_1</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

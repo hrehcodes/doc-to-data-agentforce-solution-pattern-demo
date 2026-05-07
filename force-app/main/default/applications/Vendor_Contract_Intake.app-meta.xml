@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0070D2</headerColor>
+        <logo>Vendor_Contract_Intake_image</logo>
+        <logoVersion>1</logoVersion>
+        <shouldOverrideOrgTheme>true</shouldOverrideOrgTheme>
+    </brand>
+    <description>App to manage and automate vendor contract intake</description>
+    <formFactors>Small</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>true</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>Vendor Contract Intake</label>
+    <navType>Standard</navType>
+    <tabs>New_Vendor_Contract</tabs>
+    <tabs>Contract_Intake__c</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>Vendor_Contract_Intake_UtilityBar</utilityBar>
+</CustomApplication>

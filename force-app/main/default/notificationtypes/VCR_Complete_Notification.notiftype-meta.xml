@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>VCR Complete Notification</customNotifTypeName>
+    <description>This is the notification that gets sent to a user when their record is ready.</description>
+    <desktop>true</desktop>
+    <masterLabel>VCR Complete Notification</masterLabel>
+    <mobile>true</mobile>
+    <slack>false</slack>
+</CustomNotificationType>
